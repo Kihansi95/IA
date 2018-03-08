@@ -56,6 +56,22 @@
 A FAIRE : ECRIRE ici les 3 clauses de negamax/5
 .....................................
 	*/
+negamax(J, Etat, P, Pmax, [Coup, Val]) :-
+	P = Pmax,
+	heuristique(J, Etat, H),
+	Val is H.
+negamax(J, Etat, P, Pmax, [Coup, Val]) :-
+	P < Pmax,
+	situation_terminale(J, Etat), !, 
+	heuristique(J, Etat, H),
+	Val is H.
+negamax(J, Etat, P, Pmax, [Coup, Val]) :-
+	P < Pmax,
+	successeurs(J, Etat, Succ),
+	loop_negamax(J,P,Pmax,Succ,Couples),
+	meilleur(Couples, [Coup, Val_Int]),
+	Val is -Val_Int.
+
 
 	/*******************************************
 	 DEVELOPPEMENT D'UNE SITUATION NON TERMINALE
@@ -119,6 +135,18 @@ A FAIRE : ECRIRE ici les clauses de meilleur/2
 ................................................
 
 	*/
+
+meilleur([[C, V]|Rest], [C_M, V_M]) :-
+	meilleur_rec(Rest, [C, V], [C_M, V_M]).
+
+meilleur_rec([], [C_In, V_In],[C_In, V_In]).
+meilleur_rec([[C, V]|Rest], [C_In, V_In],[C_Out, V_Out]) :-
+	V < V_In,!,
+	meilleur_rec(Rest, [C, V], [C_Out, V_Out]).
+meilleur_rec([[C, V]|Rest], [C_In, V_In],[C_Out, V_Out]) :-
+	meilleur_rec(Rest, [C_In, V_In],[C_Out, V_Out]).
+
+
 
 	/******************
   	PROGRAMME PRINCIPAL

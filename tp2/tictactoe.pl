@@ -20,7 +20,7 @@
 	DEFINIR ICI LA CLAUSE DEFINISSANT LA SITUATION INITIALE
 	*/
 
-situation_initiale([[A, B, C],[D, E, F],[G, H, I]]).
+situation_initiale([[A, B, C],[D, E, F],[x, x, I]]).
 
 	/* Convention (arbitraire) : c'est x qui commence
 
@@ -75,7 +75,7 @@ col(N,[L|M],[X|C]) :-
 % D est une liste représentant une diagonale de la matrice M 
 % il y en a 2 sortes
 
-%diagonale(D,M) :- diago_desc(1,M,D).
+diagonale(D,M) :- diago_desc(1,M,D).
 diagonale(D,M) :- length(M,LEN), diago_mont(LEN,M,D).
 
 diago_desc(_,[],[]).
@@ -87,9 +87,7 @@ diago_desc(N,[L1|M],[X|D]) :-
 % A FAIRE :
 diago_mont(_,[],[]).
 diago_mont(N,[L1|M],[X|D]) :-
-	length(M,LEN),
-	N_colonne is LEN-N+1,
-	nth1(N_colonne,L1,X),
+	nth1(N,L1,X),
 	Nsuiv is N-1,
 	diago_mont(Nsuiv,M,D).
 
@@ -111,7 +109,8 @@ possible([   ], _).
 	*/
 
 % A FAIRE 
-% unifiable(X,J) :- ? ? ? ? ?
+unifiable(X,_) :- var(X).
+unifiable(X,J) :- ground(X), X=J.
 	
 	/**********************************
 	 DEFINITION D'UN ALIGNEMENT GAGNANT
@@ -127,9 +126,8 @@ pour son adversaire.
 
 % A FAIRE
 
-% alignement_gagnant(Ali, J) :- ? ? ? ?
-
-% alignement_perdant(Ali, J) :- ? ? ? ?
+alignement_gagnant(Ali, J) :- foreach(member(X, Ali), (ground(X),X=J)).
+alignement_perdant(Ali, J) :- adversaire(J, A), alignement_gagnant(Ali, A).
 
 
 	/******************************
@@ -143,7 +141,10 @@ pour son adversaire.
 	*/	
 
 % A FAIRE
-% successeur(J,Etat,[L,C]) :- ? ? ? ?  
+successeur(J,Etat,[L,C]) :- 
+	nth1(L, Etat, Ligne),
+	nth1(C, Ligne, X),
+	var(X), X = J.
 
 	/**************************************
    	 EVALUATION HEURISTIQUE D'UNE SITUATION
@@ -165,15 +166,23 @@ heuristique(J,Situation,H) :-		% cas 1
    alignement_gagnant(Alig,J), !.
 	
 heuristique(J,Situation,H) :-		% cas 2
-   H = -10000,				% grand nombre approximant -infini
+   H = -10000,				% grand nombre approxCimant -infini
    alignement(Alig,Situation),
    alignement_perdant(Alig,J),!.	
 
 
 % on ne vient ici que si les cut precedents n'ont pas fonctionne,
 % c-a-d si Situation n'est ni perdante ni gagnante.
-
+?- situation_initiale(I), alignement_possible(x, [x, x, x], I
 % A FAIRE 					cas 3
-% heuristique(J,Situation,H) :- ? ? ? ?
+heuristique(J,Situation,H) :- 
+	findall(Ali, alignement_possible(J, Ali, Situation), Tab_J),
+	length(Tab_J, Cnt_J),
+	adversaire(J, A),
+	findall(Ali, alignement_possible(A, Ali, Situation), Tab_A),
+	length(Tab_A, Cnt_A),
+	H is Cnt_J - Cnt_A.
+	
+	
 
 
